@@ -8,5 +8,5 @@ email to the provided address.
 
 To run the script, the following libraries must be installed:
 
-Mutagen - can be installed with `pip install mutagen`
+Mutagen - can be installed with `pip install mutagen`  
 Eventful - can be found [here](http://api.eventful.com/libs/python/)
