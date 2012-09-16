@@ -3,7 +3,7 @@ from mutagen.easyid3 import EasyID3
 
 matches = []
 for root, dirnames, filenames in os.walk(sys.argv[1]):
-  for filename in fnmatch.filter(filenames, '*.mp3'):
+  for filename in fnmatch.filter(filenames, '*'):
       matches.append(os.path.join(root, filename))
 
 artists = set()
