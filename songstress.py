@@ -1,8 +1,21 @@
-import os, fnmatch, sys, urllib, simplejson, eventful
+#! /usr/bin/python
+
+import os, fnmatch, sys, urllib, simplejson, eventful, smtplib
 from mutagen.easyid3 import EasyID3
+from argparse import ArgumentParser
+from email.mime.text import MIMEText
+
+
+parser = ArgumentParser()
+parser.add_argument('dir', metavar='<directory>',
+                    help='The directory to scan for artist names')
+parser.add_argument('--email', dest='email', metavar='<email address>',
+                    help='An email address to send the results to')
+
+args = parser.parse_args()
 
 matches = []
-for root, dirnames, filenames in os.walk(sys.argv[1]):
+for root, dirnames, filenames in os.walk(args.dir):
   for filename in fnmatch.filter(filenames, '*'):
       matches.append(os.path.join(root, filename))
 
@@ -16,13 +29,36 @@ for f in matches:
         pass
 
 api = eventful.API('CdDcXHqV4qpNMq2F')
+results = ""
 
 for a in artists:
     events = api.call('/events/search', q='music', l='London', keywords=a, date='Future')
     try:
         if len(events['events']) > 0:
-            print a
+            results+=a+':\n'
         for event in events['events']['event']:
-            print "%s at %s" % (event['title'], event['venue_name'])
+            results.append('%s at %s, starttime: %s\n%s' % (event['title'], event['venue_name'], event['start_time'],event['url']))
     except:
         pass
+
+print results
+
+if args.email is not None and len(results) > 0:
+    sender = 'myconcertupdates@gmail.com'
+    recipient = args.email
+
+    session = smtplib.SMTP('smtp.gmail.com', 587)
+    session.ehlo()
+    session.starttls()
+    session.ehlo()
+    
+    session.login(sender,'R3s5h6pk2')
+    
+    headers = ["from: " + sender,
+               "subject: Concert Update",
+               "to: " + recipient,
+               "mime-version: 1.0",
+               "content-type: text/html"]
+    headers = "\r\n".join(headers)
+
+    session.sendmail(sender, recipient, headers + "\r\n\r\n" + results)
