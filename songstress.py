@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import os, fnmatch, sys, urllib, simplejson, eventful, smtplib
+import os, fnmatch, sys, urllib, simplejson, eventful, smtplib, unicodedata
 from mutagen.easyid3 import EasyID3
 from argparse import ArgumentParser
 from email.mime.text import MIMEText
@@ -32,12 +32,13 @@ api = eventful.API('CdDcXHqV4qpNMq2F')
 results = ""
 
 for a in artists:
-    events = api.call('/events/search', q='music', l='London', keywords=a, date='Future')
+    events = api.call('/events/search', q='title:"'+a+'"', l='London')
     try:
-        if len(events['events']) > 0:
-            results+=a+':\n'
-        for event in events['events']['event']:
-            results.append('%s at %s, starttime: %s\n%s' % (event['title'], event['venue_name'], event['start_time'],event['url']))
+        if int(events['total_items']) > 0:
+            e = events['events']['event'][0]
+            results+=a+':\r\n'
+            results+='%s at %s, starttime: %s\r\n%s\r\n' % (e['title'], e['venue_name'], e['start_time'],e['url'])
+            results+='\r\n'  
     except:
         pass
 
@@ -58,7 +59,7 @@ if args.email is not None and len(results) > 0:
                "subject: Concert Update",
                "to: " + recipient,
                "mime-version: 1.0",
-               "content-type: text/html"]
+               "content-type: text/plain"]
     headers = "\r\n".join(headers)
 
     session.sendmail(sender, recipient, headers + "\r\n\r\n" + results)
