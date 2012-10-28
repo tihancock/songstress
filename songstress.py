@@ -42,7 +42,7 @@ for a in artists:
     except:
         pass
 
-print results
+print results.encode('ascii', 'ignore')
 
 if args.email is not None and len(results) > 0:
     sender = 'myconcertupdates@gmail.com'
@@ -62,4 +62,4 @@ if args.email is not None and len(results) > 0:
                "content-type: text/plain"]
     headers = "\r\n".join(headers)
 
-    session.sendmail(sender, recipient, headers + "\r\n\r\n" + results)
+    session.sendmail(sender, recipient, headers + "\r\n\r\n" + results.encode('ascii', 'ignore'))
