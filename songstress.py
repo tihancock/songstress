@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import os, fnmatch, sys, urllib, simplejson, eventful, smtplib, unicodedata, json
+import os, fnmatch, sys, urllib, eventful, smtplib, unicodedata, json
 from mutagen.easyid3 import EasyID3
 from argparse import ArgumentParser
 from email.mime.text import MIMEText
@@ -23,7 +23,7 @@ if args.known_file_path is not None and os.path.exists(args.known_file_path):
      known_events = json.load(known_file)
 
 # Remove any events that have already passed
-known_events = { k : v for k, v in known_events.iteritems() if datetime(strptime(v, '%y-%m-%d %H:%M:%S') > datetime.now()) }
+known_events = { k : v for k, v in known_events.iteritems() if datetime.strptime(v, '%Y-%m-%d %H:%M:%S') > datetime.now() }
 
 matches = []
 for root, dirnames, filenames in os.walk(args.dir):
@@ -48,7 +48,7 @@ for a in artists:
         if int(events['total_items']) > 0:
             e = events['events']['event'][0]
 
-            if e['id'] in known_events:
+            if e['id'] in known_events or datetime.strptime(e['start_time'], '%Y-%m-%d %H:%M:%S') < datetime.now():
                   continue
 
             results+=a+':\r\n'
